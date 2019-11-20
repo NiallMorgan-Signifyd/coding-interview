@@ -1,8 +1,12 @@
 package com.signifyd;
 
+import com.signifyd.domain.Case;
+import com.signifyd.domain.CaseTransformed;
 import com.signifyd.extract.Extract;
+import com.signifyd.load.Load;
+import com.signifyd.transform.Transform;
 
-import java.io.FileNotFoundException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,16 +15,28 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Extract extract = new Extract("\\t");
-        List<List<String>> data = new ArrayList<>();
+        Extract extract = new Extract();
+        Transform transform = new Transform();
+        Load load = new Load();
+        List<Case> data = extract.getCsv("/Users/niallmorgan/Code/signifyd/etl-assessment/src/main/resources/trans-2018-q1.csv");
+        List<CaseTransformed> transData = new ArrayList<>();
+
+        data.forEach(d -> {
+
+            try {
+                CaseTransformed transformed = transform.scrubData(d);
+                transData.add(transformed);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+        });
+
 
         try {
-            data = extract.parseCsv("/Users/niallmorgan/Code/signifyd/etl-assessment/src/main/resources/trans-2018-q1.csv");
-            for (List<String> line : data) {
-                System.out.println(line);
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("No file found " +  e.getMessage());
+            load.writeCsv(transData,"/Users/niallmorgan/Code/signifyd/etl-assessment/src/main/resources/out.csv");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 

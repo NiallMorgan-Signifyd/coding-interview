@@ -1,41 +1,41 @@
 package com.signifyd.extract;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import com.signifyd.domain.Case;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class Extract {
 
-    private String COMMA_DELIMITER;
 
-    public Extract(String COMMA_DELIMITER) {
-        this.COMMA_DELIMITER = COMMA_DELIMITER;
-    }
+    public List<Case> getCsv(String CSV_FILE_PATH){
 
-    public List<List<String>> parseCsv (String FILE_NAME) throws FileNotFoundException {
+        List<Case> cases = new ArrayList<>();
 
-        List<List<String>> records = new ArrayList<>();
-        try (Scanner scanner = new Scanner(new File(FILE_NAME));) {
-            while (scanner.hasNextLine()) {
-                records.add(getRecordFromLine(scanner.nextLine()));
-            }
+        try (
+                Reader reader = Files.newBufferedReader(Paths.get(CSV_FILE_PATH));
+        ) {
+            CsvToBean<Case> csvToBean = new CsvToBeanBuilder(reader)
+                    .withType(Case.class)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .build();
+
+          cases = csvToBean.parse();
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return records;
 
+        return cases;
     }
 
-    private List<String> getRecordFromLine(String line) {
-        List<String> values = new ArrayList<>();
-        try (Scanner rowScanner = new Scanner(line)) {
-            rowScanner.useDelimiter(this.COMMA_DELIMITER);
-            while (rowScanner.hasNext()) {
-                values.add(rowScanner.next());
-            }
-        }
-        return values;
-    }
 
 }
