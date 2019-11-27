@@ -1,6 +1,5 @@
 package com.signifyd.load;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
@@ -12,11 +11,8 @@ import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.signifyd.domain.CaseTransformed;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -28,7 +24,7 @@ public class Load {
 
         Regions clientRegion = Regions.US_EAST_1;
         String bucketName = "files-landing";
-        String fileObjKeyName = "*** File object key name ***";
+        String fileObjKeyName = "transformed_file.csv";
 
 
         try {
@@ -38,10 +34,22 @@ public class Load {
 
             PutObjectRequest request = new PutObjectRequest(bucketName, fileObjKeyName, new File(fileName));
             s3Client.putObject(request);
-        } catch (AmazonServiceException e) {
+        } catch (SdkClientException e) {
             e.printStackTrace();
         }
 
+
+    }
+
+    public void  writeCsv(List<CaseTransformed> cases, String filePath) throws Exception {
+        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
+
+        StatefulBeanToCsv sbc = new StatefulBeanToCsvBuilder(writer)
+                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
+                .build();
+
+        sbc.write(cases);
+        writer.close();
 
     }
 
