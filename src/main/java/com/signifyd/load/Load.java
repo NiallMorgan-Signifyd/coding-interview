@@ -27,8 +27,7 @@ public class Load {
     public void saveToS3(String fileName){
 
         Regions clientRegion = Regions.US_EAST_1;
-        String bucketName = "irs-landingzone";
-        String stringObjKeyName = "*** String object key name ***";
+        String bucketName = "files-landing";
         String fileObjKeyName = "*** File object key name ***";
 
 
@@ -37,31 +36,12 @@ public class Load {
                     .withRegion(clientRegion)
                     .build();
 
-            // Upload a file as a new object with ContentType and title specified.
             PutObjectRequest request = new PutObjectRequest(bucketName, fileObjKeyName, new File(fileName));
             s3Client.putObject(request);
         } catch (AmazonServiceException e) {
-            // The call was transmitted successfully, but Amazon S3 couldn't process
-            // it, so it returned an error response.
-            e.printStackTrace();
-        } catch (SdkClientException e) {
-            // Amazon S3 couldn't be contacted for a response, or the client
-            // couldn't parse the response from Amazon S3.
             e.printStackTrace();
         }
 
-
-    }
-
-    public void  writeCsv(List<CaseTransformed> cases, String filePath) throws Exception {
-        Writer writer = Files.newBufferedWriter(Paths.get(filePath));
-
-        StatefulBeanToCsv sbc = new StatefulBeanToCsvBuilder(writer)
-                .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
-                .build();
-
-        sbc.write(cases);
-        writer.close();
 
     }
 
